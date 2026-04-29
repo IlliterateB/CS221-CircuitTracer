@@ -48,10 +48,83 @@ public class CircuitBoard {
 		//TODO: parse the given file to populate the char[][]
 		// throw FileNotFoundException if Scanner cannot read the file
 		// throw InvalidFileFormatException if any issues are encountered while parsing the file
-		
-		ROWS = 0; //replace with initialization statements using values from file
-		COLS = 0;
-		
+
+		if (!fileScan.hasNextInt()) {
+			fileScan.close();
+			throw new InvalidFileFormatException("Missing number of rows");
+		}
+
+		ROWS = fileScan.nextInt();
+
+		if (!fileScan.hasNextInt()) {
+			fileScan.close();
+			throw new InvalidFileFormatException("Missing number of columns");
+		}
+
+		COLS = fileScan.nextInt();
+		board = new char[ROWS][COLS];
+		fileScan.nextLine(); // move to the actual board maze
+
+		for (int r = 0; r < ROWS; r++) {
+
+			if (!fileScan.hasNextLine()) {
+				fileScan.close();
+				throw new InvalidFileFormatException("Too few rows");
+			}
+
+			Scanner lineScnr = new Scanner(fileScan.nextLine());
+			
+			for (int c = 0; c < COLS; c++) {
+
+				if (!lineScnr.hasNext()) {
+					lineScnr.close();
+					throw new InvalidFileFormatException("Too few columns in row " + r);
+				}
+
+				char currChar = lineScnr.next().charAt(0);
+
+				if (ALLOWED_CHARS.indexOf(currChar) == -1) {
+					lineScnr.close();
+					throw new InvalidFileFormatException("Invalid character '" + currChar + "' at row " + r + ", col " + c);
+				}
+
+				board[r][c] = currChar;
+				if (currChar == START && startingPoint == null) {
+					startingPoint = new Point(r, c);
+				} else if (currChar == START && startingPoint != null) {
+					lineScnr.close();
+					throw new InvalidFileFormatException("Multiple starting points found at row " + r + ", col " + c);
+				} else if (currChar == END && endingPoint == null) {
+					endingPoint = new Point(r, c);
+				} else if (currChar == END && endingPoint != null) {
+					lineScnr.close();
+					throw new InvalidFileFormatException("Multiple ending points found at row " + r + ", col " + c);
+				}
+
+			}
+
+			if (lineScnr.hasNext()) {
+				lineScnr.close();
+				throw new InvalidFileFormatException("Too many columns in row " + r);
+			}
+
+			lineScnr.close();
+		}
+
+		if (startingPoint == null) {
+			fileScan.close();
+			throw new InvalidFileFormatException("No starting point found");
+		}
+		if (endingPoint == null) {
+			fileScan.close();
+			throw new InvalidFileFormatException("No ending point found");
+		}
+
+		if (fileScan.hasNext()) {
+			fileScan.close();
+			throw new InvalidFileFormatException("Too many rows");
+		}
+
 		fileScan.close();
 	}
 	
