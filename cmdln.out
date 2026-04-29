@@ -1,0 +1,6 @@
+Usage: java CircuitTracer <-s|-q> <-c|-g> <input file>
+  -s: use stack for search
+  -q: use queue for search
+  -c: console output
+  -g: GUI output (unimplemented) 
+  <input file>: path to the circuit board input file
