@@ -32,7 +32,7 @@ public class CircuitTracer {
 		System.out.println("  -s: use stack for search");
 		System.out.println("  -q: use queue for search");
 		System.out.println("  -c: console output");
-		System.out.println("  -g: GUI output (unimplemented) ");
+		System.out.println("  -g: GUI output ");
 		System.out.println("  <input file>: path to the circuit board input file");
 	}
 	
@@ -97,7 +97,7 @@ public class CircuitTracer {
 		ArrayList<TraceState> bestPaths = new ArrayList<TraceState>();
 		
 		// just to test for O(n)
-		int moveCount = 0;
+		// int moveCount = 0;
 
 		// seed the store with initial TraceState for each open neighbor of the starting component
 		int[] dirRow = {-1, 1, 0, 0};
@@ -113,7 +113,7 @@ public class CircuitTracer {
 			} else if (board.isOpen(newRow, newCol)) { // this is if they aren't touching and need to trace together
 				stateStore.store(new TraceState(board, newRow, newCol));
 			} 
-			moveCount++;
+			// moveCount++;
 		}
 
 		while (!stateStore.isEmpty()) {
@@ -123,10 +123,10 @@ public class CircuitTracer {
 				if (bestPaths.isEmpty() || currState.pathLength() < bestPaths.get(0).pathLength()) {
 					bestPaths.clear();
 					bestPaths.add(currState);
-					moveCount++;
+					// moveCount++;
 				} else if (currState.pathLength() == bestPaths.get(0).pathLength()) {
 					bestPaths.add(currState);
-					moveCount++;
+					// moveCount++;
 				}
 			} else {
 				int currRow = currState.getRow();
@@ -139,7 +139,7 @@ public class CircuitTracer {
 					if (currState.isOpen(newRow, newCol)) {
 						stateStore.store(new TraceState(currState, newRow, newCol));
 					}
-					moveCount++;
+					// moveCount++;
 				}	
 			}
 		}
@@ -150,14 +150,12 @@ public class CircuitTracer {
 
 		if (args[1].equals("-c")) {
 			// Console output
-			if (bestPaths.isEmpty()) {
-				System.out.println("No paths found.");
-			} else {
-				for (TraceState path : bestPaths) {
-					System.out.println(path.toString());
-				}
+			
+			for (TraceState path : bestPaths) {
+				System.out.println(path.toString());
 			}
-			System.out.println(moveCount);
+			
+			// System.out.println(moveCount);
 
 		} else if (args[1].equals("-g")) {
 			// // GUI output (unimplemented)

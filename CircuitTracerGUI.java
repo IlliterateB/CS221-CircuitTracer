@@ -1,19 +1,10 @@
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
 import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 /**
  * Main panel for Circuit Tracer GUI output 
@@ -26,8 +17,15 @@ public class CircuitTracerGUI extends JPanel {
 	private JFrame frame;
 	private JPanel boardPanel;
 	private JLabel[][] posLabel;
+
+	private JList<String> solutionList;
+	private CircuitBoard board;
+	private ArrayList<TraceState> solutions;
 	
 	public CircuitTracerGUI(CircuitBoard board, ArrayList<TraceState> solutions) {
+		this.board = board;
+		this.solutions = solutions;
+
 		frame = new JFrame("Circuit Tracer");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(800, 600);
@@ -48,7 +46,7 @@ public class CircuitTracerGUI extends JPanel {
 				posLabel[r][c].setOpaque(true);
 				posLabel[r][c].setHorizontalAlignment(JLabel.CENTER);
 				posLabel[r][c].setFont(new Font("Arial", Font.BOLD, 20));
-				posLabel[r][c].setPreferredSize(new Dimension(50, 50));
+				posLabel[r][c].setPreferredSize(new Dimension(100, 50));
 				posLabel[r][c].setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
 				if (board.charAt(r, c) == 'T') {
@@ -67,14 +65,112 @@ public class CircuitTracerGUI extends JPanel {
 					posLabel[r][c].setForeground(Color.BLUE);
 					posLabel[r][c].setText("2");
 				}
+			}
+
+			frame.add(boardPanel, BorderLayout.CENTER);
 		}
 
-		frame.add(boardPanel, BorderLayout.CENTER);
 		frame.setVisible(true);
-	}
+
+		DefaultListModel<String> listModel = new DefaultListModel<>();
+		for (int i = 0; i < solutions.size(); i++) {
+			listModel.addElement("Solution " + (i + 1) + " (length: " + solutions.get(i).pathLength() + ")");
+		}
+		
+		
+		solutionList = new JList<>(listModel);
+		solutionList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+		solutionList.addListSelectionListener(new ListSelectListener());
+
+		JScrollPane scrollPane = new JScrollPane(solutionList);
+		scrollPane.setPreferredSize(new Dimension(200, 600));
+		frame.add(scrollPane, BorderLayout.EAST);
+
+		// JTabbedPane tabPane = new JTabbedPane();
+		// JPopupMenu helpMenu = new JPopupMenu("Help");
+		// JMenuItem aboutItem = new JMenuItem("About");
+		// helpMenu.add(aboutItem);
+		// tabPane.add("Help", helpMenu);
+	
+		JMenuBar menuBar = new JMenuBar();
+		JMenu helpMenu = new JMenu("Help");
+		JMenuItem aboutItem = new JMenuItem("About");
+		aboutItem.addActionListener(e -> JOptionPane.showMessageDialog(frame,
+			"Circuit Tracer GUI\nAuthor: Bryson Leatham\nThis GUI allows you to view different solutions for connecting components on a circuit board.",
+			"About", JOptionPane.INFORMATION_MESSAGE));
+		helpMenu.add(aboutItem);
+		menuBar.add(helpMenu);
+		frame.setJMenuBar(menuBar);
+
+		// aboutItem.addActionListener(e -> {
+		// 	JOptionPane.showMessageDialog(frame, "Circuit Tracer GUI\nAuthor: Bryson Leatham\nThis GUI allows you to view different solutions for connecting components on a circuit board. Select a solution from the list to see the path highlighted on the board.");
+		// });
+
+		// tabPane.addChangeListener(e -> {
+		// 	helpMenu.show(tabPane, tabPane.getWidth()/2, tabPane.getHeight()/2);
+		// });
+
+		// frame.add(tabPane, BorderLayout.NORTH);
+
+		// Fit everything on the window
+		frame.pack();
 
 	}
+
+	private void solutionBoard(CircuitBoard board, TraceState solution) {
+		// Clear the current board display
+		for (int r = 0; r < board.numRows(); r++) {
+			for (int c = 0; c < board.numCols(); c++) {
+				posLabel[r][c].setText("" + board.charAt(r, c));
+				posLabel[r][c].setBackground(Color.WHITE);
+
+				if (board.charAt(r, c) == 'T') {
+					posLabel[r][c].setText("T");
+					posLabel[r][c].setForeground(Color.RED);
+				} else if (board.charAt(r, c) == 'X') {
+					posLabel[r][c].setForeground(Color.BLACK);
+					posLabel[r][c].setText("X");
+				} else if (board.charAt(r, c) == 'O') {
+					posLabel[r][c].setForeground(Color.BLACK);
+					posLabel[r][c].setText("O");
+				} else if (board.charAt(r, c) == '1') {
+					posLabel[r][c].setForeground(Color.GREEN);
+					posLabel[r][c].setText("1");
+				} else if (board.charAt(r, c) == '2') {
+					posLabel[r][c].setForeground(Color.BLUE);
+					posLabel[r][c].setText("2");
+				}
+			}
+		}
+
+		// Highlight the solution path on the board
+		ArrayList<Point> path = solution.getPath();
+		for (Point p : path) {
+			posLabel[p.x][p.y].setText("T");
+			posLabel[p.x][p.y].setBackground(Color.GRAY);
+			posLabel[p.x][p.y].setForeground(Color.RED);
+		}
+	}
+
+	private class ListSelectListener implements ListSelectionListener {
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			if (!e.getValueIsAdjusting()) {
+				int selectedIndex = solutionList.getSelectedIndex();
+				if (selectedIndex != -1) {
+					TraceState selectedSolution = solutions.get(selectedIndex);
+					solutionBoard(board, selectedSolution);
+				}
+			}
+		}
+	}
 }
+
+
+
+
+
 
 
 
