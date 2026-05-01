@@ -96,6 +96,7 @@ public class CircuitTracer {
 		Storage<TraceState> stateStore = storage;
 		ArrayList<TraceState> bestPaths = new ArrayList<TraceState>();
 		
+		// just to test for O(n)
 		int moveCount = 0;
 
 		// seed the store with initial TraceState for each open neighbor of the starting component
@@ -104,10 +105,15 @@ public class CircuitTracer {
 		for (int i = 0; i < 4; i++) {
 			int newRow = board.getStartingPoint().x + dirRow[i];
 			int newCol = board.getStartingPoint().y + dirCol[i];
-			if (board.isOpen(newRow, newCol)) {
+			 
+			// first checks if the start and end are next to each other
+			if (board.getStartingPoint().x + newRow == board.getEndingPoint().x && board.getStartingPoint().y + newCol == board.getEndingPoint().y) { 
+				System.out.println("\nStart point and end point are next to each other: \n" + board.toString());
+				return; //exit the constructor immediately
+			} else if (board.isOpen(newRow, newCol)) { // this is if they aren't touching and need to trace together
 				stateStore.store(new TraceState(board, newRow, newCol));
-				moveCount++;
-			}
+			} 
+			moveCount++;
 		}
 
 		while (!stateStore.isEmpty()) {
@@ -117,24 +123,26 @@ public class CircuitTracer {
 				if (bestPaths.isEmpty() || currState.pathLength() < bestPaths.get(0).pathLength()) {
 					bestPaths.clear();
 					bestPaths.add(currState);
+					moveCount++;
 				} else if (currState.pathLength() == bestPaths.get(0).pathLength()) {
 					bestPaths.add(currState);
+					moveCount++;
 				}
 			} else {
-					int currRow = currState.getRow();
-					int currCol = currState.getCol();
+				int currRow = currState.getRow();
+				int currCol = currState.getCol();
 
-					for (int i = 0; i < 4; i++) {
-						int newRow = currRow + dirRow[i];
-						int newCol = currCol + dirCol[i];
+				for (int i = 0; i < 4; i++) {
+					int newRow = currRow + dirRow[i];
+					int newCol = currCol + dirCol[i];
 
-						if (currState.isOpen(newRow, newCol)) {
-							stateStore.store(new TraceState(currState, newRow, newCol));
-							moveCount++;
-						}
-					}	
-				}
+					if (currState.isOpen(newRow, newCol)) {
+						stateStore.store(new TraceState(currState, newRow, newCol));
+					}
+					moveCount++;
+				}	
 			}
+		}
 		
 
 
@@ -142,14 +150,19 @@ public class CircuitTracer {
 
 		if (args[1].equals("-c")) {
 			// Console output
-			for (TraceState path : bestPaths) {
-				System.out.println(path.toString());
+			if (bestPaths.isEmpty()) {
+				System.out.println("No paths found.");
+			} else {
+				for (TraceState path : bestPaths) {
+					System.out.println(path.toString());
+				}
 			}
-			// System.out.println(moveCount);
+			System.out.println(moveCount);
 
 		} else if (args[1].equals("-g")) {
-			// GUI output (unimplemented)
-			System.out.println("Please use <-c> command-line arg. GUI output is unimplemented.");
+			// // GUI output (unimplemented)
+			// System.out.println("Please use <-c> command-line arg. GUI output is unimplemented.");
+			CircuitTracerGUI gui = new CircuitTracerGUI(board, bestPaths);
 		}
 
 		

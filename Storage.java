@@ -22,6 +22,8 @@ public class Storage<T>
 	/** the data structures - only one will be instantiated and used  */
 	private Queue<T> queue;
 	private Stack<T> stack;
+
+	
 	
 	/** Constructor
 	 * @param dataStructure choice of DataStructures 
@@ -119,4 +121,7 @@ public class Storage<T>
 		} 
 		return size;
 	}
+
+	
+
 } // class Storage
