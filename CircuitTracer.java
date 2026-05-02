@@ -1,4 +1,3 @@
-import java.awt.Point;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
@@ -26,7 +25,7 @@ public class CircuitTracer {
 
 	/** Print instructions for running CircuitTracer from the command line. */
 	private void printUsage() {
-		//TODO: print out clear usage instructions when there are problems with
+		// print out clear usage instructions when there are problems with
 		// any command line args
 		System.out.println("Usage: java CircuitTracer <-s|-q> <-c|-g> <input file>");
 		System.out.println("  -s: use stack for search");
@@ -43,16 +42,11 @@ public class CircuitTracer {
 	 * @param args command line arguments passed through from main()
 	 */
 	public CircuitTracer(String[] args) {
-		//TODO: parse and validate command line args - first validation provided
+		// parse and validate command line args
 		if (args.length != 3) {
 			printUsage();
 			return; //exit the constructor immediately
 		}
-
-		// just to test and make sure its actually reading the args correctly TODO delete
-		// for (String a : args) {
-		// 	System.out.println(a);
-		// }
 
 		if (!args[0].equals("-s") && !args[0].equals("-q")) {
 			printUsage();
@@ -69,16 +63,16 @@ public class CircuitTracer {
 			return; //exit the constructor immediately
 		}
 		
-		//TODO: initialize the Storage to use either a stack or queue
-		Storage<TraceState> storage = null;
+		// initialize the Storage to use either a stack or queue
+		Storage<TraceState> stateStore = null;
 	
 		if (args[0].equals("-s")) {
-			storage = new Storage<TraceState>(Storage.DataStructure.stack);
+			stateStore = new Storage<TraceState>(Storage.DataStructure.stack);
 		} else if (args[0].equals("-q")) {
-			storage = new Storage<TraceState>(Storage.DataStructure.queue);
+			stateStore = new Storage<TraceState>(Storage.DataStructure.queue);
 		}
 
-		//TODO: read in the CircuitBoard from the given file
+		// read in the CircuitBoard from the given file
 		CircuitBoard board;
 
 		try {
@@ -91,9 +85,7 @@ public class CircuitTracer {
 			return; //exit the constructor immediately
 		} 
 
-		//TODO: run the search for best paths
-
-		Storage<TraceState> stateStore = storage;
+		// run the search for best paths
 		ArrayList<TraceState> bestPaths = new ArrayList<TraceState>();
 		
 		// just to test for O(n)
@@ -110,25 +102,27 @@ public class CircuitTracer {
 			if (board.getStartingPoint().x + newRow == board.getEndingPoint().x && board.getStartingPoint().y + newCol == board.getEndingPoint().y) { 
 				System.out.println("\nStart point and end point are next to each other: \n" + board.toString());
 				return; //exit the constructor immediately
+
 			} else if (board.isOpen(newRow, newCol)) { // this is if they aren't touching and need to trace together
 				stateStore.store(new TraceState(board, newRow, newCol));
 			} 
 			// moveCount++;
 		}
 
+		// main loop to check if the circuit is complete
 		while (!stateStore.isEmpty()) {
 			TraceState currState = stateStore.retrieve();
 			
 			if (currState.isSolution()) {
-				if (bestPaths.isEmpty() || currState.pathLength() < bestPaths.get(0).pathLength()) {
-					bestPaths.clear();
+				if (bestPaths.isEmpty() || currState.pathLength() < bestPaths.get(0).pathLength()) { // if the current path is shortest or if it's the first
+					bestPaths.clear(); // remove all longer paths
 					bestPaths.add(currState);
 					// moveCount++;
-				} else if (currState.pathLength() == bestPaths.get(0).pathLength()) {
+				} else if (currState.pathLength() == bestPaths.get(0).pathLength()) { // if its of equal length, add
 					bestPaths.add(currState);
 					// moveCount++;
 				}
-			} else {
+			} else { // if it's not a solution, keep searching
 				int currRow = currState.getRow();
 				int currCol = currState.getCol();
 
@@ -144,13 +138,9 @@ public class CircuitTracer {
 			}
 		}
 		
-
-
-		//TODO: output results to console or GUI, according to specified choice
-
+		// output results
 		if (args[1].equals("-c")) {
 			// Console output
-			
 			for (TraceState path : bestPaths) {
 				System.out.println(path.toString());
 			}

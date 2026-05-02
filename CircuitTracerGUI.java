@@ -13,19 +13,21 @@ import java.util.ArrayList;
  * @author Bryson Leatham
  */
 public class CircuitTracerGUI extends JPanel {
-	
-	private JFrame frame;
-	private JPanel boardPanel;
-	private JLabel[][] posLabel;
+	// Top-level Swing components
+	private JFrame frame;              // main application window
+	private JPanel boardPanel;         // panel that holds the grid of board cells
+	private JLabel[][] posLabel;       // 2D array of labels corresponding to board positions
 
-	private JList<String> solutionList;
-	private CircuitBoard board;
-	private ArrayList<TraceState> solutions;
+	// Sidebar components and model data
+	private JList<String> solutionList; // list showing available solution paths
+	private CircuitBoard board;         // original board used to initialize the GUI
+	private ArrayList<TraceState> solutions; // list of solution TraceState objects
 	
 	public CircuitTracerGUI(CircuitBoard board, ArrayList<TraceState> solutions) {
 		this.board = board;
 		this.solutions = solutions;
 
+		// Build the main application window
 		frame = new JFrame("Circuit Tracer");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(800, 600);
@@ -34,12 +36,14 @@ public class CircuitTracerGUI extends JPanel {
 		int rows = board.numRows();
 		int cols = board.numCols();
 
+		// Create the board panel using a GridLayout so labels line up like the board
 		boardPanel = new JPanel();
 		boardPanel.setLayout(new GridLayout(rows, cols));
 		posLabel = new JLabel[rows][cols];
 
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
+				// Initialize each cell label and set its appearance based on board contents
 				posLabel[r][c] = new JLabel();
 				boardPanel.add(posLabel[r][c]);
 
@@ -49,6 +53,7 @@ public class CircuitTracerGUI extends JPanel {
 				posLabel[r][c].setPreferredSize(new Dimension(100, 50));
 				posLabel[r][c].setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
+				// Render initial character for this board position (T, X, O, 1, 2)
 				if (board.charAt(r, c) == 'T') {
 					posLabel[r][c].setText("T");
 					posLabel[r][c].setForeground(Color.RED);
@@ -72,6 +77,7 @@ public class CircuitTracerGUI extends JPanel {
 
 		frame.setVisible(true);
 
+		// Build the model that populates the solutions list in the sidebar
 		DefaultListModel<String> listModel = new DefaultListModel<>();
 		for (int i = 0; i < solutions.size(); i++) {
 			listModel.addElement("Solution " + (i + 1) + " (length: " + solutions.get(i).pathLength() + ")");
@@ -86,13 +92,8 @@ public class CircuitTracerGUI extends JPanel {
 		JScrollPane scrollPane = new JScrollPane(solutionList);
 		scrollPane.setPreferredSize(new Dimension(200, 600));
 		frame.add(scrollPane, BorderLayout.EAST);
-
-		// JTabbedPane tabPane = new JTabbedPane();
-		// JPopupMenu helpMenu = new JPopupMenu("Help");
-		// JMenuItem aboutItem = new JMenuItem("About");
-		// helpMenu.add(aboutItem);
-		// tabPane.add("Help", helpMenu);
 	
+		// Simple Help tab in bar that shows an About dialog
 		JMenuBar menuBar = new JMenuBar();
 		JMenu helpMenu = new JMenu("Help");
 		JMenuItem aboutItem = new JMenuItem("About");
@@ -103,28 +104,19 @@ public class CircuitTracerGUI extends JPanel {
 		menuBar.add(helpMenu);
 		frame.setJMenuBar(menuBar);
 
-		// aboutItem.addActionListener(e -> {
-		// 	JOptionPane.showMessageDialog(frame, "Circuit Tracer GUI\nAuthor: Bryson Leatham\nThis GUI allows you to view different solutions for connecting components on a circuit board. Select a solution from the list to see the path highlighted on the board.");
-		// });
-
-		// tabPane.addChangeListener(e -> {
-		// 	helpMenu.show(tabPane, tabPane.getWidth()/2, tabPane.getHeight()/2);
-		// });
-
-		// frame.add(tabPane, BorderLayout.NORTH);
-
 		// Fit everything on the window
 		frame.pack();
 
 	}
 
 	private void solutionBoard(CircuitBoard board, TraceState solution) {
-		// Clear the current board display
+		// Reset the display to the base board characters, clearing any previous highlights
 		for (int r = 0; r < board.numRows(); r++) {
 			for (int c = 0; c < board.numCols(); c++) {
 				posLabel[r][c].setText("" + board.charAt(r, c));
 				posLabel[r][c].setBackground(Color.WHITE);
 
+				// Restore the correct color and text for each board character
 				if (board.charAt(r, c) == 'T') {
 					posLabel[r][c].setText("T");
 					posLabel[r][c].setForeground(Color.RED);
@@ -144,7 +136,7 @@ public class CircuitTracerGUI extends JPanel {
 			}
 		}
 
-		// Highlight the solution path on the board
+		// Highlight the solution path on the board by marking T's and changing background
 		ArrayList<Point> path = solution.getPath();
 		for (Point p : path) {
 			posLabel[p.x][p.y].setText("T");

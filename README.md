@@ -1,7 +1,7 @@
 ****************
 * Circuit Tracer
 * CS221
-* Apr 10, 2026
+* May 1, 2026
 * Bryson Leatham
 **************** 
 
@@ -20,6 +20,7 @@ INCLUDED FILES:
 * <TraceState.java> - source file - represents paths on CircuitBoard
 * <README.md> - this file
 
+
 COMPILING AND RUNNING:
 
     To compile this project, use:
@@ -35,74 +36,58 @@ COMPILING AND RUNNING:
 
 PROGRAM DESIGN AND IMPORTANT CONCEPTS:
 
-    This Circuit Tracer uses a public class <CircuitTracer(String[] args)> which is then called in the <main>. First, CircuitBoard parses the given input file and does prior InvalidFileFormatException checking. Then, CircuitTracer checks args and uses those to initialize Storage for a Queue or Stack. It then checks surrounding postions from the starting position, moves to open positions based on the search type, and creates a TraceState on the position.  
-    
+    This Circuit Tracer uses a public class <CircuitTracer(String[] args)> which is then called in the <main>. First, CircuitBoard parses the given input file and does prior InvalidFileFormatException checking. Then, CircuitTracer checks args and uses those to initialize Storage for a Queue or Stack. It then checks surrounding postions from the starting position, moves to open positions based on the search type, and creates a TraceState on the position. The character '1' is used for the start position, '2' is the ending position, 'X' is a wall that blocks a path, a 'O' (capital o, not 0), counts as an open position that a 'T', or Trace can replace it. An example input file looks like this:
+
+        3 3
+        1 O X
+        X O X
+        2 O O
+
+    The first 3 designates the number of rows on the board, and the second 3 is for the columns. If it is formatted incorrectly, an InvalidFileFormatException is thrown, and if the program for some 
+    reason tries to trace a path on a non-open position, an OccupiedPositionException is thrown.
     
     Circuit Tracer can use two different brute-force search orders, Stack and Queue. Stack is a Last-In-First-Out based search, and uses depth-first exploration and follows until the it either finds a solution or gets stuck, then backtracks to the last open position. Queue, however, is a First-In-First-Out, breadth-first based search. It searches all states once, then loops back to the first open position.
 
-
-    This Double-Linked List is very similar to a single-linked list
-    at its core, but with the added functionality of traversing backwards.
-    Being able to traverse the list from both ends allows certain methods,
-    like removeLast() or addToFront(), to be constant-time. It also allows
-    methods like get() or any index-based method to cut the Order coefficient
-    in half by starting at the closer end to the node.
-
-    With those index-based methods, special cases, usually at the head or tail,
-    are taken care of first. Then, if the index is less than half of the list’s size,
-    the current node is set to head and counts up from there; otherwise, the current
-    node is set to tail and counts down to the index. Once the current node reaches
-    that index, the specific method’s functions will run.
-
-    IUDoubleLinkedList also has a  class that implements the ListIterator
-    interface. It is also a fail-fast iterator, so if the list changes, it will throw a
-    ConcurrentModificationException, so it doesn’t give false information.
-    Its constructors allow it to start at the beginning of the list,
-    or in front of any specific index as long as it is within 0 to the list size.
-    This means that a call to next() will point to head, or the Node at the input index.
-    ListIterator allows the user to traverse the list from both directions, add, remove,
-    set, and get positional information about the list as well.
-
-    Node.java functions are used in IUDoubleLinkedList to move nodes, select surrounding
-    nodes, and even set a specific node to reference a different Generic T Object.
-
+    Circuit Tracer's main logic is it first checks if the positions surrounding the starting '1' are open. For each open position, a new TraceState is created at that position and added in an ArrayList of TraceStates called stateStore. Next, while stateStore isn't empty, it constantly checks whether the current path is a solution, or it keeps iterating and checking around each current position to see where to move.
 
 
 TESTING:
 
-Using ListTester.java, it is very easy to test the functionality of the
-Double-Linked List. Running whenever the code is changed gives feedback on
-how those changes fixed or ruined functionality. Scenarios were added to test
-all types of generic cases, as well as many edge cases. These edge cases are
-typically for IndexOutOfBounds and NoSuchElement Exceptions, accounting for
-erroneous input.
+    Using CircuitTracerTester.java, it is very easy to test many different outcomes and inputs for Circuit Tracer.
+    Running after each code change allows for quick feedback whether it fixed functionality or made it worse.
+    Scenarios were given to test from many input files, both formatted correctly, and incorrectly. Scenarios
+    labeled at the top with "CircuitBoard Constructor Tests" test whether the inputted file is formatted correctly,
+    such as if the number of rows and columns are correct, whether there is more than a single start or end/ if there
+    is any at all. They may also test to see if the character at each position is actually an allowable char.
 
-No known bugs persist, but as-is, there is no way to check the total amount
-of tests implemented compared to the amount run. When creating or altering
-this program, the total tests run can vary wildly.
+    The next two sets of tester scenarios deal with the CircuitTracer, and see if the program's output matches
+    the tester's for both valid and invalid inputs. Incorrect command line argument tests are also in the 
+    "CircuitTracer Invalid Command Line Tests" section, where it tests if a helpful usage message is output.
+    The CircuitTracerTester also checks both Stack and Queue search, as well as both console and GUI output.
 
+    No known bugs exist, and many conditional statements were created in CircuitBoard to test for different
+    types of incorrectly formatted files.
 
 
 DISCUSSION:
 
-When creating this program, I frequently had problems getting to the
-correct node, like when using index-based functions, moving from
-the tail. After I was able to confirm that some of those loops worked
-correctly using the ListTester, I got more comfortable looping through the list.
+    When working on this project, it took me a while to fully understand and start the project.
+    Many of my classes had projects this week, meaning I had to push this back and build up stress.
+    Once I finally got through my mind-block, I was able to understand the TraceState and Storage 
+    methods and was able to write from the pseudocode fairly quickly.
 
-When adding new List Iterator scenarios in ListTester, I also struggled
-because my Literator add function basically wasn’t written at that point. I
-must have started it, got distracted, and never went back until the end.
-I also had a problem because I made the error of adding Element_A twice to
-the scenario’s list, and I tried altering multiple methods across all of
-IUDoubleLinkedList, rather than noticing I made that mistake.
+    My hardest bug I had to deal with was in the while(!stateStore.isEmpty()) loop, as I 
+    accidentally connected the isSolution if statements to the rest of the searching function.
+    This means it would stop after 1 or 2 moves and I couldn't tell why for over 45 minutes 
+    if I had to guess. The only way I noticed was by adding a moveCount because I wanted
+    to find the Order as well. That's when I saw it always stopped after the one or two moves.
 
-Overall, this project was very challenging in its specifics. Understanding
-the general idea of what needed to happen wasn’t extraordinarily difficult,
-but finding the exact steps to get to that point could be.
+    Overall, this problem wasn't too difficult comparatively, as we were given pseudocode, a
+    finished tester, and many finished classes. This I am very grateful for due to the time crunch.
+    I also liked this project as it got me more used to using pseudocode, and the analysis questions
+    made me think deeper into the logic and movements.
 
 
- 
 EXTRA CREDIT:
 
     CircuitTracerGUI.java opens a window that you can see the original board, all the possible solutions for that file, and has an about tab which creates a popup window.
@@ -139,4 +124,4 @@ What does the order reflect? (Maximum size of Storage? Number of board positions
 
 What is 'n', the single primary input factor that increases the difficulty of the task?
 
-    n is the number of available spots to check
+    n is the number of available spots to check.

@@ -46,7 +46,7 @@ public class CircuitBoard {
 	public CircuitBoard(String filename) throws FileNotFoundException {
 		Scanner fileScan = new Scanner(new File(filename));
 		
-		//TODO: parse the given file to populate the char[][]
+		// parse the given file to populate the char[][]
 		// throw FileNotFoundException if Scanner cannot read the file
 		// throw InvalidFileFormatException if any issues are encountered while parsing the file
 
@@ -54,15 +54,14 @@ public class CircuitBoard {
 			fileScan.close();
 			throw new InvalidFileFormatException("Missing number of rows");
 		}
-
 		ROWS = fileScan.nextInt();
 
 		if (!fileScan.hasNextInt()) {
 			fileScan.close();
 			throw new InvalidFileFormatException("Missing number of columns");
 		}
-
 		COLS = fileScan.nextInt();
+
 		board = new char[ROWS][COLS];
 		fileScan.nextLine(); // move to the actual board maze
 
@@ -73,7 +72,7 @@ public class CircuitBoard {
 				throw new InvalidFileFormatException("Too few rows");
 			}
 
-			Scanner lineScnr = new Scanner(fileScan.nextLine());
+			Scanner lineScnr = new Scanner(fileScan.nextLine()); // create a scanner for the specific line
 			
 			for (int c = 0; c < COLS; c++) {
 
@@ -82,21 +81,23 @@ public class CircuitBoard {
 					throw new InvalidFileFormatException("Too few columns in row " + r);
 				}
 
-				char currChar = lineScnr.next().charAt(0);
+				char currChar = lineScnr.next().charAt(0); // get the next char
 
-				if (ALLOWED_CHARS.indexOf(currChar) == -1) {
+				if (ALLOWED_CHARS.indexOf(currChar) == -1) { 
 					lineScnr.close();
 					throw new InvalidFileFormatException("Invalid character '" + currChar + "' at row " + r + ", col " + c);
 				}
 
-				board[r][c] = currChar;
+				board[r][c] = currChar; // add the allowable character to the circuit board
 				
-				if (currChar == START && startingPoint == null) {
+				// find whether its a start/end and if theres more than one of each
+				if (currChar == START && startingPoint == null) { // first start point
 					startingPoint = new Point(r, c);
 				} else if (currChar == START && startingPoint != null) {
 					lineScnr.close();
 					throw new InvalidFileFormatException("Multiple starting points found at row " + r + ", col " + c);
-				} else if (currChar == END && endingPoint == null) {
+
+				} else if (currChar == END && endingPoint == null) { // first end point
 					endingPoint = new Point(r, c);
 				} else if (currChar == END && endingPoint != null) {
 					lineScnr.close();
